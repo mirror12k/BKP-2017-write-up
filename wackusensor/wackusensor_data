@@ -1,0 +1,174 @@
+00000004
+PANG
+n
+00000000
+00000000
+n
+
+
+
+00000010 => PHP_File_Include
+s => 0000003C => super_secret_file_containing_the_flag_you_should_read_it.php
+00000017 => /var/www/html/index.php
+0000000F
+s => 00000015 => "include" was called.
+
+0000000A => Var_Access
+a (00000002)
+	=> 00000003 => GET
+	=> 00000001 => s
+	=> 00000017 => /var/www/html/index.php
+00000012
+n
+
+
+# this means that super_secret_parameter_hahaha is being accessed from the $_GET array
+0000000A => Var_Access
+a
+00000002
+00000003 => GET
+0000001D => super_secret_parameter_hahaha
+00000017 => /var/www/html/index.php
+00000014
+n
+
+
+
+
+00000004
+PANG
+n
+00000000
+00000000
+n
+
+
+00000010 => PHP_File_Include
+s
+0000003C => super_secret_file_containing_the_flag_you_should_read_it.php
+00000017 => /var/www/html/index.php
+0000000F
+s
+00000015 => "include" was called.
+
+0000000A => Var_Access
+a
+00000002
+00000003 => GET
+00000001 => s
+00000017 => /var/www/html/index.php
+00000012
+n
+
+0000000A => Var_Access
+a
+00000002
+00000003 =>GET
+0000001D => super_secret_parameter_hahaha
+00000017 => /var/www/html/index.php
+00000014
+n
+
+0000000A => Var_Access
+a
+00000002
+00000003 =>GET
+0000001D => super_secret_parameter_hahaha
+00000017 => /var/www/html/index.php
+00000015
+n
+
+0000000A => Var_Access
+a
+00000002
+00000003 =>GET
+0000001D => super_secret_parameter_hahaha
+00000017 => /var/www/html/index.php
+00000018
+n
+
+00000009 => File_Open
+a
+00000001
+00000012 => acu_phpaspect.txt
+00000017 => /var/www/html/index.php
+00000018
+a
+00000001
+0000001F => "file_get_contents" was called.
+
+
+
+
+
+
+
+00000010PHP_File_Includes0000003Csuper_secret_file_containing_the_flag_you_should_read_it.php00000017/var/www/html/index.php0000000Fs00000015"include" was called.
+0000000A => Var_Access
+a (00000002) =>
+	00000003 => GET
+	00000001 => s
+	00000017 => /var/www/html/index.php
+	00000012
+	n
+0000000A => Var_Access
+a (00000002) =>
+	00000003 => GET
+	0000001D => super_secret_parameter_hahaha
+	00000017 => /var/www/html/index.php
+	00000014
+	n
+0000000A => Var_Access
+a (00000002) =>
+	00000003 => GET
+	0000001D => super_secret_parameter_hahaha
+	00000017 => /var/www/html/index.php
+	00000015
+	n
+
+
+
+
+
+
+
+00000010PHP_File_Includes0000003Csuper_secret_file_containing_the_flag_you_should_read_it.php00000017/var/www/html/index.php0000000Fs00000015"include" was called.
+0000000A => Var_Access
+a (00000002)
+	=> 00000003 =>GET
+	00000001 => s
+	00000017 => /var/www/html/index.php
+	00000012
+	n
+0000000A => Var_Access
+a (00000002)
+	=> 00000003 =>GET
+	0000001D => super_secret_parameter_hahaha
+	00000017 => /var/www/html/index.php
+	00000014
+	n
+
+0000000A => Var_Access
+a (00000002)
+	=> 00000003 =>GET
+	0000001D => super_secret_parameter_hahaha
+	00000017 => /var/www/html/index.php
+	00000015
+	n
+
+0000000A => Var_Access
+a (00000002)
+	=> 00000003 =>GET
+	0000001D => super_secret_parameter_hahaha
+	00000017 => /var/www/html/index.php
+	00000018
+	n
+00000009 => File_Open
+a (00000001)
+	0000000A => index.php
+	00000017 => /var/www/html/index.php
+	00000018
+	a000000010000001F"file_get_contents" was called.
+
+
+
