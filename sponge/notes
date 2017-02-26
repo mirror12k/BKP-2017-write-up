@@ -1,0 +1,98 @@
+
+
+# uses AES-128 as it's base crypto primative with a static key of 16 bytes all null
+# works on 10 byte blocks of plaintext and produces 20 bytes of output
+
+# target string: 'I love using sponges for crypto'
+# target hash: 11153c85d1b549e58b1b40eeb0fd7e34d53a48ba
+
+so recap:
+
+	E(block) := AES_128_ECB_encrypt(key='\x00' x 16, plaintext=block)
+	D(block) := AES_128_ECB_decrypt(key='\x00' x 16, ciphertext=block)
+
+	init_state := '\x00' x 16
+	pad_block := '\x80' + '\x00'*8 + '\x01'
+
+	ingest(block, state) -> new_state := E((block || '\x00' x 6) ^ state)
+	output(state) -> output := state[:10] || E(state)[:10]
+
+	H(block) -> hash := output(ingest(pad_block, ingest(block, init_state)))
+
+
+computational power:
+	I can perform 2^20 aes encryption blocks per second on a core
+	2^16 seconds in a day
+	2^3 cores
+	total computational power ~2^40 per day
+	therefore: cant perform any 2^48 attacks for this challenge
+
+modelling the problem as a pre-image attack:
+	first find an output_state such that output_state[:10] == expected[:10] and E(output_state)[:10] == expected[10:]
+		output space is 2^48 / 2^128 and input space is 2^48
+		complexity of 2^48
+	given a working output_state, decrypt output_state such that:
+		intermediate_state_2 = D(output_state) ^ pad_block
+		therefore, we have now extracted our pad_block
+	given the intermediate_state_2, we now need to produce an intermediate_state_1 such that all 48 bits on the end are 0
+		intermediate_state_1 = D(intermediate_state_2) ^ second_block
+		input space is 2^80 and output space is 2^48 / 2^128
+		complexity will be 2^48
+	given a valid intermediate_state_1 we can now find our first_block
+		first_block = intermediate_state_1[:10]
+	total complexity about 2 * 2^48 == 2^49
+
+alternative method by modeling the problem as a second-preimage attack:
+	take an early block in the given plaintext, alter it until we find an altered block such that E(new_block) produces no differences in the final 6 bytes
+		difficulty of 2^48, so fairly reasonable
+	once such a block is found, we simply xor the differences in this state with the previous state in this location, and then apply those differences the next block
+		new_next_block = next_block ^ E(new_block) ^ E(old_block)
+	total complexity about 2^48
+
+by extending the second-preimage attack further to 3 blocks:
+	produce a variety of new vectors 
+		vector = D(D(output_state) ^ random_third_block)
+	for each vector, we can get a new 6 byte suffix to attack
+	this extends the previous attack by reducing the complexity of finding the first_block
+		new difficulty is 2^48 / len(vectors)
+	picking a reasonable number of vectors of 2^20, we get a reasonable complexity of 2^28
+
+
+by remodeling the problem as a meet-in-the-middle for a second-preimage attack:
+	by taking the output_state, we can generate a number of intermediate vectors a step before the output_state,
+	and then look for blocks which produce one of the intermediates
+
+	definitions:
+		first_block := blocks[0] || '\x00' x 6
+		second_block := blocks[1] || '\x00' x 6
+		third_block := blocks[2] || '\x00' x 6
+		pad_block := '\x80\x00\x00\x00\x00\x00\x00\x00\x00\x01' || '\x00' * 6
+
+		intermediate_state_1 := E(first_block)
+			* by picking various different first_blocks, we can generate a variety of intermediate_state_2 vectors with different tail bytes
+		intermediate_state_2 := E(intermediate_state_1 ^ second_block)
+			* any changes in bytes 0 .. 9 can be fixed by editting the block
+			* bytes 10 .. 15 are completely static
+		intermediate_state_3 := E(intermediate_state_2 ^ third_block)
+			* repeatedly decrypting the intermediate_state_2 ^ third_block with different third_block values,
+			* we can search for a third_block which produces an intermediate_state_2 with the tail that we have already in generated vectors
+		output_state := E(intermediate_state_3 ^ pad_block)
+			* pad_block is static and therefore intermediate_state_3 must be static as well to produce the correct output state
+
+		total := E(E(E(E(first_block) ^ second_block) ^ third_block) ^ pad_block)
+
+	reversed:
+		intermediate_state_3 := D(output_state) ^ pad_block
+		intermediate_state_2 := D(intermediate_state_3) ^ third_block
+
+
+	meet-in-the-middle will be performed at intermediate_state_2
+		the only part we cant modify is the 6 null bytes tacked onto second_block,
+		we compensate for this by generating a variety of vectors for the 6 byte tail
+	we generate random first_block values, encrypting them, and storing the resulting 6 byte tails as potential vectors
+	we take the known output_state, and calculate the intermediate_state_3
+	then we calculate random third_block values, decrypting them, and looking for a value that produces a known tail vector
+	given a matching first_block and third_block that produce the same tail,
+	we can compute a second_block value which xors the difference between the respective intermediate_state_2s 
+
+
